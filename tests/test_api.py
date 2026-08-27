@@ -124,6 +124,8 @@ def test_rate_limit_returns_429_when_exceeded(monkeypatch):
     assert first.status_code == 200
     assert second.status_code == 429
     assert second.headers["retry-after"] == "60"
+    assert second.headers["x-content-type-options"] == "nosniff"
+    assert second.headers["x-request-id"]
 
 
 def test_expired_url_returns_410_and_keeps_analytics():

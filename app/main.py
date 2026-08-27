@@ -47,9 +47,22 @@ def hostname_resolves_to_unsafe_address(hostname: str) -> bool:
 
 @app.middleware("http")
 async def request_logging_middleware(request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid4()))
+
+    def rejection(status_code: int, detail: str, extra_headers: dict[str, str] | None = None):
+        headers = {
+            "X-Request-ID": request_id,
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "Referrer-Policy": "no-referrer",
+        }
+        if extra_headers:
+            headers.update(extra_headers)
+        return JSONResponse(status_code=status_code, content={"detail": detail}, headers=headers)
+
     content_length = request.headers.get("content-length")
     if content_length and content_length.isdigit() and int(content_length) > settings.max_request_bytes:
-        return JSONResponse(status_code=413, content={"detail": "Request body too large"})
+        return rejection(413, "Request body too large")
     client_key = request.client.host if request.client else "unknown"
     now = time.monotonic()
     with rate_limit_lock:
@@ -57,13 +70,8 @@ async def request_logging_middleware(request, call_next):
         while requests and now - requests[0] >= 60:
             requests.popleft()
         if len(requests) >= settings.rate_limit_per_minute:
-            return JSONResponse(
-                status_code=429,
-                content={"detail": "Rate limit exceeded"},
-                headers={"Retry-After": "60"},
-            )
+            return rejection(429, "Rate limit exceeded", {"Retry-After": "60"})
         requests.append(now)
-    request_id = request.headers.get("X-Request-ID", str(uuid4()))
     started = time.perf_counter()
     response = await call_next(request)
     duration_ms = round((time.perf_counter() - started) * 1000, 2)
