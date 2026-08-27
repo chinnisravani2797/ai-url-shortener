@@ -15,7 +15,7 @@
 
 **AI-assisted execution:** AI helped suggest endpoint shapes, validation cases, test cases, and documentation wording. The engineer reviewed and adapted each suggestion to the chosen FastAPI/SQLite design.
 
-**Validation:** Pytest covers successful creation, redirect behavior, analytics, and missing codes. Manual Swagger testing confirms the API contract. Ruff and Bandit are planned quality gates.
+**Validation:** Pytest covers successful creation, redirect behavior, analytics, and missing codes. Manual Swagger testing confirms the API contract. Ruff and Bandit run as quality gates locally and in GitHub Actions.
 
 ## 2. Brownfield: fix a short-code collision defect
 

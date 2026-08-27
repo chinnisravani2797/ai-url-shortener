@@ -24,7 +24,7 @@
 - SQLite keeps the prototype simple and runnable without external infrastructure; production would use a managed relational database.
 - Random codes avoid exposing sequential database IDs; a uniqueness check with bounded retries handles collisions.
 - Redirects use HTTP 307 so the destination is explicit and the behavior is easy to test.
-- The API accepts only HTTP(S) URLs through Pydantic validation. Abuse protection, authentication, rate limiting, and a distributed analytics store are production follow-up items.
+- The API accepts only HTTP(S) URLs through Pydantic validation, rejects unsafe destinations, applies configurable rate limiting, and optionally protects analytics with an API key. A distributed limiter and stronger identity/authorization model remain production follow-ups.
 
 ## AI-assisted engineering control flow
 
