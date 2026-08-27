@@ -89,6 +89,7 @@ Expected results:
 - Redirect response: includes `X-Request-ID`, `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` headers.
 - Analytics request: HTTP `200 OK` with `click_count: 1`, proving the redirect was recorded.
 - Invalid or unsafe URL: HTTP `422 Unprocessable Entity`, proving request validation is active.
+- If `CREATE_API_KEY` is configured, include it as `X-API-Key` when creating URLs; missing or invalid keys return `401`.
 
 ## Run tests and quality checks
 

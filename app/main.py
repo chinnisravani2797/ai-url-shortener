@@ -77,7 +77,15 @@ def readiness(db: Session = Depends(get_db)) -> dict[str, str]:  # noqa: B008
 
 
 @app.post("/api/v1/urls", response_model=UrlResponse, status_code=status.HTTP_201_CREATED)
-def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url:  # noqa: B008
+def create_short_url(
+    payload: UrlCreate,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str | None = Header(default=None, alias="X-API-Key"),
+) -> Url:
+    if settings.create_api_key and (
+        not api_key or not hmac.compare_digest(api_key, settings.create_api_key)
+    ):
+        raise HTTPException(status_code=401, detail="Valid API key required")
     alphabet = string.ascii_letters + string.digits
     for _ in range(5):
         code = "".join(secrets.choice(alphabet) for _ in range(7))

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = False
     analytics_api_key: str | None = None
+    create_api_key: str | None = None
     rate_limit_per_minute: int = 60
     max_request_bytes: int = 16_384
 

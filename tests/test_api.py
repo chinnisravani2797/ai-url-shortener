@@ -95,6 +95,14 @@ def test_analytics_api_key_is_enforced_when_configured(monkeypatch):
     assert authorized.status_code == 200
 
 
+def test_create_api_key_is_enforced_when_configured(monkeypatch):
+    monkeypatch.setattr(main.settings, "create_api_key", "create-key")
+    payload = {"original_url": "https://example.org/create-auth"}
+    assert client.post("/api/v1/urls", json=payload).status_code == 401
+    assert client.post("/api/v1/urls", json=payload, headers={"X-API-Key": "wrong"}).status_code == 401
+    assert client.post("/api/v1/urls", json=payload, headers={"X-API-Key": "create-key"}).status_code == 201
+
+
 def test_rate_limit_returns_429_when_exceeded(monkeypatch):
     main.rate_limit_state.clear()
     monkeypatch.setattr(main.settings, "rate_limit_per_minute", 1)
