@@ -1,6 +1,10 @@
+import json
+import logging
 import secrets
 import string
+import time
 from datetime import datetime, timezone
+from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
@@ -14,6 +18,26 @@ app = FastAPI(
     title="AI-Assisted URL Shortener",
     version="0.1.0",
 )
+
+logger = logging.getLogger("url_shortener")
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+
+@app.middleware("http")
+async def request_logging_middleware(request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid4()))
+    started = time.perf_counter()
+    response = await call_next(request)
+    duration_ms = round((time.perf_counter() - started) * 1000, 2)
+    logger.info(json.dumps({
+        "request_id": request_id,
+        "method": request.method,
+        "path": request.url.path,
+        "status_code": response.status_code,
+        "duration_ms": duration_ms,
+    }))
+    response.headers["X-Request-ID"] = request_id
+    return response
 
 Base.metadata.create_all(bind=engine)
 
