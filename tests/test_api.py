@@ -14,6 +14,12 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
+def test_readiness():
+    response = client.get("/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+
 def test_create_redirect_and_analytics():
     created = client.post(
         "/api/v1/urls",

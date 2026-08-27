@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.responses import JSONResponse, RedirectResponse
-from sqlalchemy import update
+from sqlalchemy import text, update
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -62,6 +62,12 @@ Base.metadata.create_all(bind=engine)
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness(db: Session = Depends(get_db)) -> dict[str, str]:  # noqa: B008
+    db.execute(text("SELECT 1"))
+    return {"status": "ready"}
 
 
 @app.post("/api/v1/urls", response_model=UrlResponse, status_code=status.HTTP_201_CREATED)
