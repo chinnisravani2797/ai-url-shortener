@@ -5,6 +5,15 @@
 - Python 3.11 or newer
 - Git
 
+Verify the prerequisites before setup:
+
+```powershell
+python --version
+git --version
+```
+
+If either command is unavailable, install Python from [python.org](https://www.python.org/downloads/windows/) and Git from [git-scm.com](https://git-scm.com/download/win), then reopen PowerShell.
+
 ## Windows setup
 
 ```powershell
@@ -38,6 +47,15 @@ uvicorn app.main:app --reload
 
 Open the interactive documentation at `http://127.0.0.1:8000/docs`.
 
+You can also verify process and database readiness:
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:8000/health"
+Invoke-RestMethod "http://127.0.0.1:8000/ready"
+```
+
+Expected responses are `{"status":"ok"}` and `{"status":"ready"}`.
+
 ## Example request
 
 ```powershell
@@ -48,6 +66,29 @@ Invoke-RestMethod -Method Post `
 ```
 
 Use the returned `short_code` in `http://127.0.0.1:8000/{short_code}`. Analytics are available at `/api/v1/urls/{short_code}/analytics`.
+
+## PowerShell verification
+
+```powershell
+$response = Invoke-RestMethod `
+  -Method Post `
+  -Uri "http://127.0.0.1:8000/api/v1/urls" `
+  -ContentType "application/json" `
+  -Body '{"original_url":"https://www.example.com"}'
+
+$response | ConvertTo-Json
+$code = $response.short_code
+Invoke-WebRequest "http://127.0.0.1:8000/$code" -MaximumRedirection 0
+Invoke-RestMethod "http://127.0.0.1:8000/api/v1/urls/$code/analytics" | ConvertTo-Json
+```
+
+Expected results:
+
+- Create request: HTTP `201 Created` with a generated `short_code`.
+- Redirect request: HTTP `307 Temporary Redirect`. This is successful because the service intentionally tells the client to fetch the original URL without silently changing the request method.
+- Redirect response: includes `X-Request-ID`, `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` headers.
+- Analytics request: HTTP `200 OK` with `click_count: 1`, proving the redirect was recorded.
+- Invalid or unsafe URL: HTTP `422 Unprocessable Entity`, proving request validation is active.
 
 ## Run tests and quality checks
 

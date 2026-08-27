@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
@@ -94,9 +95,10 @@ def test_rate_limit_returns_429_when_exceeded(monkeypatch):
 
 
 def test_expired_url_returns_410_and_keeps_analytics():
+    short_code = f"expired-{uuid4().hex[:8]}"
     db = SessionLocal()
     record = Url(
-        short_code="expired1",
+        short_code=short_code,
         original_url="https://example.org/expired",
         expires_at=datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(minutes=1),
     )
@@ -104,8 +106,8 @@ def test_expired_url_returns_410_and_keeps_analytics():
     db.commit()
     db.close()
 
-    response = client.get("/expired1")
+    response = client.get(f"/{short_code}")
     assert response.status_code == 410
-    analytics = client.get("/api/v1/urls/expired1/analytics")
+    analytics = client.get(f"/api/v1/urls/{short_code}/analytics")
     assert analytics.status_code == 200
     assert analytics.json()["click_count"] == 0
