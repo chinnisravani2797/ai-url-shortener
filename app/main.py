@@ -24,7 +24,7 @@ def health() -> dict[str, str]:
 
 
 @app.post("/api/v1/urls", response_model=UrlResponse, status_code=status.HTTP_201_CREATED)
-def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url:
+def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url:  # noqa: B008
     alphabet = string.ascii_letters + string.digits
     for _ in range(5):
         code = "".join(secrets.choice(alphabet) for _ in range(7))
@@ -42,7 +42,7 @@ def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url:
 
 
 @app.get("/api/v1/urls/{short_code}/analytics", response_model=AnalyticsResponse)
-def get_analytics(short_code: str, db: Session = Depends(get_db)) -> AnalyticsResponse:
+def get_analytics(short_code: str, db: Session = Depends(get_db)) -> AnalyticsResponse:  # noqa: B008
     record = db.query(Url).filter(Url.short_code == short_code).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Short URL not found")
@@ -56,7 +56,7 @@ def get_analytics(short_code: str, db: Session = Depends(get_db)) -> AnalyticsRe
 
 
 @app.get("/{short_code}")
-def redirect_to_original(short_code: str, db: Session = Depends(get_db)) -> RedirectResponse:
+def redirect_to_original(short_code: str, db: Session = Depends(get_db)) -> RedirectResponse:  # noqa: B008
     record = db.query(Url).filter(Url.short_code == short_code).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Short URL not found")
