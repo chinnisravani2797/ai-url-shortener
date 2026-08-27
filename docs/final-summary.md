@@ -5,6 +5,7 @@
 - FastAPI URL-shortener prototype with create, redirect, analytics, and expiry behavior.
 - SQLite persistence with collision-aware random short-code generation.
 - Input validation and controlled `404`, `410`, `422`, and `503` responses.
+- Configurable per-client rate limiting with controlled `429` responses.
 - Automated API tests covering successful and failure paths.
 - Architecture, setup, scenario, and AI traceability documentation.
 
@@ -19,7 +20,8 @@
 
 - SQLite should be replaced with a managed, highly available database.
 - Add authentication and authorization for analytics and administrative operations.
-- Add rate limiting, abuse detection, destination safety checks, and operational metrics.
+- Add abuse detection, destination safety checks, and operational metrics.
+- Replace the in-memory limiter with a shared Redis or gateway-level limiter for multi-instance deployment.
 - Add load/concurrency testing and distributed click-event processing.
 - GitHub Actions CI now runs tests, Ruff, and Bandit on every push and pull request.
 

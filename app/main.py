@@ -4,11 +4,13 @@ import logging
 import secrets
 import string
 import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone
+from threading import Lock
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -24,10 +26,21 @@ app = FastAPI(
 logger = logging.getLogger("url_shortener")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 settings = get_settings()
+rate_limit_state: dict[str, deque[float]] = defaultdict(deque)
+rate_limit_lock = Lock()
 
 
 @app.middleware("http")
 async def request_logging_middleware(request, call_next):
+    client_key = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    with rate_limit_lock:
+        requests = rate_limit_state[client_key]
+        while requests and now - requests[0] >= 60:
+            requests.popleft()
+        if len(requests) >= settings.rate_limit_per_minute:
+            return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"})
+        requests.append(now)
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
     started = time.perf_counter()
     response = await call_next(request)

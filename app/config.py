@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = False
     analytics_api_key: str | None = None
+    rate_limit_per_minute: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
