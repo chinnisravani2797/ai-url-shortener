@@ -44,3 +44,11 @@ def test_past_expiry_is_rejected():
         },
     )
     assert response.status_code == 422
+
+
+def test_unsafe_destination_is_rejected():
+    response = client.post(
+        "/api/v1/urls",
+        json={"original_url": "http://127.0.0.1/admin"},
+    )
+    assert response.status_code == 422
