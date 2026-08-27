@@ -57,7 +57,11 @@ async def request_logging_middleware(request, call_next):
         while requests and now - requests[0] >= 60:
             requests.popleft()
         if len(requests) >= settings.rate_limit_per_minute:
-            return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"})
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded"},
+                headers={"Retry-After": "60"},
+            )
         requests.append(now)
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
     started = time.perf_counter()

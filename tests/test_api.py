@@ -123,6 +123,7 @@ def test_rate_limit_returns_429_when_exceeded(monkeypatch):
     second = client.get("/health")
     assert first.status_code == 200
     assert second.status_code == 429
+    assert second.headers["retry-after"] == "60"
 
 
 def test_expired_url_returns_410_and_keeps_analytics():
