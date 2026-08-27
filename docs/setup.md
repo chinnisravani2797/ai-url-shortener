@@ -58,3 +58,17 @@ bandit -r app
 ```
 
 The SQLite database is created automatically at runtime and is intentionally excluded from Git.
+
+## Optional Docker/PostgreSQL run
+
+Install Docker Desktop, then run:
+
+```powershell
+docker compose up --build
+```
+
+The API is available at `http://127.0.0.1:8000`. The Compose password is a local-development placeholder; replace it with a secret-managed value for real deployment. Stop the stack with:
+
+```powershell
+docker compose down
+```
