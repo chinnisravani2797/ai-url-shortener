@@ -67,6 +67,19 @@ def test_unsafe_destination_is_rejected():
     assert response.status_code == 422
 
 
+def test_hostname_resolving_to_private_address_is_rejected(monkeypatch):
+    monkeypatch.setattr(
+        main.socket,
+        "getaddrinfo",
+        lambda *args, **kwargs: [(None, None, None, None, ("10.0.0.5", 0))],
+    )
+    response = client.post(
+        "/api/v1/urls",
+        json={"original_url": "https://internal.example"},
+    )
+    assert response.status_code == 422
+
+
 def test_oversized_request_is_rejected(monkeypatch):
     monkeypatch.setattr(main.settings, "max_request_bytes", 10)
     response = client.post(

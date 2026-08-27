@@ -1,7 +1,9 @@
 import hmac
+import ipaddress
 import json
 import logging
 import secrets
+import socket
 import string
 import time
 from collections import defaultdict, deque
@@ -29,6 +31,18 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 settings = get_settings()
 rate_limit_state: dict[str, deque[float]] = defaultdict(deque)
 rate_limit_lock = Lock()
+
+
+def hostname_resolves_to_unsafe_address(hostname: str) -> bool:
+    try:
+        addresses = socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)
+    except socket.gaierror:
+        return False
+    return any(
+        parsed.is_private or parsed.is_loopback or parsed.is_link_local or parsed.is_reserved
+        for address in addresses
+        for parsed in [ipaddress.ip_address(address[4][0])]
+    )
 
 
 @app.middleware("http")
@@ -86,6 +100,9 @@ def create_short_url(
         not api_key or not hmac.compare_digest(api_key, settings.create_api_key)
     ):
         raise HTTPException(status_code=401, detail="Valid API key required")
+    hostname = (payload.original_url.host or "").lower().rstrip(".")
+    if hostname_resolves_to_unsafe_address(hostname):
+        raise HTTPException(status_code=422, detail="Private or local destinations are not allowed")
     alphabet = string.ascii_letters + string.digits
     for _ in range(5):
         code = "".join(secrets.choice(alphabet) for _ in range(7))
