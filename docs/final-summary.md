@@ -4,6 +4,7 @@
 
 - FastAPI URL-shortener prototype with create, redirect, analytics, and expiry behavior.
 - SQLite persistence with collision-aware random short-code generation.
+- PostgreSQL-compatible SQLAlchemy configuration with connection health checks for container or managed deployments.
 - Input validation and controlled `404`, `410`, `422`, and `503` responses.
 - Configurable per-client rate limiting with controlled `429` responses.
 - Automated API tests covering successful and failure paths.

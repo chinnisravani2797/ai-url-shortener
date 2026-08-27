@@ -102,6 +102,8 @@ bandit -r app
 
 The SQLite database is created automatically at runtime and is intentionally excluded from Git.
 
+For production-style local deployment, Docker Compose runs the API against PostgreSQL. The SQLAlchemy connection enables connection health checks with `pool_pre_ping`; use a managed PostgreSQL service and secret-managed credentials outside local Compose.
+
 ## Optional Docker/PostgreSQL run
 
 Install Docker Desktop, then run:
