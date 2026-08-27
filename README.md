@@ -28,3 +28,5 @@ Implementation and design decisions will be added incrementally as the prototype
 - [Engineering scenarios](docs/scenarios.md)
 - [AI-assisted execution log](docs/ai-execution-log.md)
 - [Final engineering summary](docs/final-summary.md)
+
+GitHub Actions runs the automated tests, Ruff, and Bandit checks for pushes and pull requests.

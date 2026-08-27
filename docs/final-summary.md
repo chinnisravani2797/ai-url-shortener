@@ -21,7 +21,7 @@
 - Add authentication and authorization for analytics and administrative operations.
 - Add rate limiting, abuse detection, destination safety checks, and operational metrics.
 - Add load/concurrency testing and distributed click-event processing.
-- Add CI execution on every pull request.
+- GitHub Actions CI now runs tests, Ruff, and Bandit on every push and pull request.
 
 ## Engineering ownership
 
