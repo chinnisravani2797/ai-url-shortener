@@ -67,6 +67,16 @@ def test_unsafe_destination_is_rejected():
     assert response.status_code == 422
 
 
+def test_oversized_request_is_rejected(monkeypatch):
+    monkeypatch.setattr(main.settings, "max_request_bytes", 10)
+    response = client.post(
+        "/api/v1/urls",
+        content='{"original_url":"https://example.org"}',
+        headers={"content-type": "application/json", "content-length": "100"},
+    )
+    assert response.status_code == 413
+
+
 def test_analytics_api_key_is_enforced_when_configured(monkeypatch):
     created = client.post(
         "/api/v1/urls",

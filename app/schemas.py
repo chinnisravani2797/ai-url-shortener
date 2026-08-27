@@ -2,11 +2,11 @@ import ipaddress
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
-from pydantic import AnyHttpUrl, BaseModel, field_validator
+from pydantic import AnyHttpUrl, BaseModel, Field, field_validator
 
 
 class UrlCreate(BaseModel):
-    original_url: AnyHttpUrl
+    original_url: AnyHttpUrl = Field(max_length=2048)
     expires_at: datetime | None = None
 
     @field_validator("expires_at")

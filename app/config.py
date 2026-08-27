@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     debug: bool = False
     analytics_api_key: str | None = None
     rate_limit_per_minute: int = 60
+    max_request_bytes: int = 16_384
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

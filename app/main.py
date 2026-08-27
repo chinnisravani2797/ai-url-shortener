@@ -33,6 +33,9 @@ rate_limit_lock = Lock()
 
 @app.middleware("http")
 async def request_logging_middleware(request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and content_length.isdigit() and int(content_length) > settings.max_request_bytes:
+        return JSONResponse(status_code=413, content={"detail": "Request body too large"})
     client_key = request.client.host if request.client else "unknown"
     now = time.monotonic()
     with rate_limit_lock:
