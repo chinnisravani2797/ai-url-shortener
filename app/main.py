@@ -1,3 +1,4 @@
+import hmac
 import json
 import logging
 import secrets
@@ -6,10 +7,11 @@ import time
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from .config import get_settings
 from .db import Base, engine, get_db
 from .models import Url
 from .schemas import AnalyticsResponse, UrlCreate, UrlResponse
@@ -21,6 +23,7 @@ app = FastAPI(
 
 logger = logging.getLogger("url_shortener")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
+settings = get_settings()
 
 
 @app.middleware("http")
@@ -66,7 +69,15 @@ def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url: 
 
 
 @app.get("/api/v1/urls/{short_code}/analytics", response_model=AnalyticsResponse)
-def get_analytics(short_code: str, db: Session = Depends(get_db)) -> AnalyticsResponse:  # noqa: B008
+def get_analytics(
+    short_code: str,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str | None = Header(default=None, alias="X-API-Key"),
+) -> AnalyticsResponse:
+    if settings.analytics_api_key and not api_key:
+        raise HTTPException(status_code=401, detail="Valid API key required")
+    if settings.analytics_api_key and not hmac.compare_digest(api_key, settings.analytics_api_key):
+        raise HTTPException(status_code=401, detail="Valid API key required")
     record = db.query(Url).filter(Url.short_code == short_code).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Short URL not found")
