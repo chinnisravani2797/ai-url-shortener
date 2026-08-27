@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
+from app import main
 from app.main import app
 
 client = TestClient(app)
@@ -52,3 +53,21 @@ def test_unsafe_destination_is_rejected():
         json={"original_url": "http://127.0.0.1/admin"},
     )
     assert response.status_code == 422
+
+
+def test_analytics_api_key_is_enforced_when_configured(monkeypatch):
+    created = client.post(
+        "/api/v1/urls",
+        json={"original_url": "https://example.org/protected"},
+    )
+    short_code = created.json()["short_code"]
+    monkeypatch.setattr(main.settings, "analytics_api_key", "test-key")
+
+    unauthorized = client.get(f"/api/v1/urls/{short_code}/analytics")
+    assert unauthorized.status_code == 401
+
+    authorized = client.get(
+        f"/api/v1/urls/{short_code}/analytics",
+        headers={"X-API-Key": "test-key"},
+    )
+    assert authorized.status_code == 200
