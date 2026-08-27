@@ -1,4 +1,5 @@
 fastapi
+starlette>=0.40,<1
 uvicorn[standard]
 sqlalchemy
 pydantic

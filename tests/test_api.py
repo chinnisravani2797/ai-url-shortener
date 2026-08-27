@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -31,3 +33,14 @@ def test_create_redirect_and_analytics():
 def test_unknown_short_code_returns_404():
     response = client.get("/does-not-exist")
     assert response.status_code == 404
+
+
+def test_past_expiry_is_rejected():
+    response = client.post(
+        "/api/v1/urls",
+        json={
+            "original_url": "https://example.org/expired",
+            "expires_at": (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat(),
+        },
+    )
+    assert response.status_code == 422

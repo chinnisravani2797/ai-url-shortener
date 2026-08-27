@@ -1,5 +1,6 @@
 import secrets
 import string
+from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import RedirectResponse
@@ -28,7 +29,11 @@ def create_short_url(payload: UrlCreate, db: Session = Depends(get_db)) -> Url:
     for _ in range(5):
         code = "".join(secrets.choice(alphabet) for _ in range(7))
         if db.query(Url).filter(Url.short_code == code).first() is None:
-            record = Url(short_code=code, original_url=str(payload.original_url))
+            record = Url(
+                short_code=code,
+                original_url=str(payload.original_url),
+                expires_at=payload.expires_at,
+            )
             db.add(record)
             db.commit()
             db.refresh(record)
@@ -46,6 +51,7 @@ def get_analytics(short_code: str, db: Session = Depends(get_db)) -> AnalyticsRe
         original_url=record.original_url,
         created_at=record.created_at.isoformat(),
         click_count=record.click_count,
+        expires_at=record.expires_at,
     )
 
 
@@ -54,6 +60,8 @@ def redirect_to_original(short_code: str, db: Session = Depends(get_db)) -> Redi
     record = db.query(Url).filter(Url.short_code == short_code).first()
     if record is None:
         raise HTTPException(status_code=404, detail="Short URL not found")
+    if record.expires_at is not None and record.expires_at <= datetime.now(timezone.utc).replace(tzinfo=None):
+        raise HTTPException(status_code=410, detail="Short URL has expired")
     record.click_count += 1
     db.commit()
     return RedirectResponse(url=record.original_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
