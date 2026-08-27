@@ -80,3 +80,12 @@ def test_analytics_api_key_is_enforced_when_configured(monkeypatch):
         headers={"X-API-Key": "test-key"},
     )
     assert authorized.status_code == 200
+
+
+def test_rate_limit_returns_429_when_exceeded(monkeypatch):
+    main.rate_limit_state.clear()
+    monkeypatch.setattr(main.settings, "rate_limit_per_minute", 1)
+    first = client.get("/health")
+    second = client.get("/health")
+    assert first.status_code == 200
+    assert second.status_code == 429
