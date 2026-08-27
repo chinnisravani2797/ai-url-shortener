@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -110,6 +111,10 @@ def redirect_to_original(short_code: str, db: Session = Depends(get_db)) -> Redi
         raise HTTPException(status_code=404, detail="Short URL not found")
     if record.expires_at is not None and record.expires_at <= datetime.now(timezone.utc).replace(tzinfo=None):
         raise HTTPException(status_code=410, detail="Short URL has expired")
-    record.click_count += 1
+    db.execute(
+        update(Url)
+        .where(Url.id == record.id)
+        .values(click_count=Url.click_count + 1)
+    )
     db.commit()
     return RedirectResponse(url=record.original_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
