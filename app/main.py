@@ -54,6 +54,9 @@ async def request_logging_middleware(request, call_next):
         "duration_ms": duration_ms,
     }))
     response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
     return response
 
 Base.metadata.create_all(bind=engine)
