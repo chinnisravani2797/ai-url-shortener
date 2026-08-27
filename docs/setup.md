@@ -22,6 +22,14 @@ If PowerShell blocks activation, run once as your user:
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
+Optional environment configuration:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Never commit `.env`; it is excluded by `.gitignore`.
+
 ## Run the API
 
 ```powershell
