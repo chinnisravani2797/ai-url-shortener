@@ -31,4 +31,15 @@ Implementation and design decisions will be added incrementally as the prototype
 - [AI-assisted execution log](docs/ai-execution-log.md)
 - [Final engineering summary](docs/final-summary.md)
 
+## Assessment Scope Coverage
+
+This section provides a quick reviewer-oriented mapping to the assessment scope:
+
+- **Greenfield** — initial URL-shortener architecture and core APIs.
+- **Brownfield** — incremental expiry, authentication, rate limiting, validation, and reliability improvements.
+- **Testing** — pytest coverage plus Ruff, Bandit, and GitHub Actions CI checks.
+- **Documentation** — setup, architecture, engineering scenarios, AI execution traceability, and final summary.
+- **Well-defined requirements** — URL creation, redirect, analytics, health, and readiness behavior.
+- **Ambiguous requirements** — documented assumptions and decisions for expiry, security, validation, and trade-offs.
+
 GitHub Actions runs the automated tests, Ruff, and Bandit checks for pushes and pull requests.
