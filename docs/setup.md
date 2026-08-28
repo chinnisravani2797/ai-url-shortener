@@ -92,6 +92,16 @@ Expected results:
 - If `CREATE_API_KEY` is configured, include it as `X-API-Key` when creating URLs; missing or invalid keys return `401`.
 - Rate-limited requests return `429` with `Retry-After: 60`.
 
+## Browser redirect test
+
+Copy the `short_code` returned by the create request and open this URL in a browser:
+
+```text
+http://127.0.0.1:8000/<short_code>
+```
+
+The browser follows the expected `307 Temporary Redirect` and opens the original destination URL. To inspect the status code instead, use the PowerShell command above with `-MaximumRedirection 0`.
+
 ## Run tests and quality checks
 
 ```powershell

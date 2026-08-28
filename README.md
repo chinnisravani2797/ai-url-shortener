@@ -11,6 +11,8 @@ This project is an engineer-led, AI-assisted prototype for a production-minded U
 
 Interactive API documentation is available at `/docs` when the application is running.
 
+After creating a short URL, open `http://127.0.0.1:8000/<short_code>` in a browser to verify that it redirects to the original URL.
+
 ## Initial scope
 
 - Create a short URL from a validated long URL.
